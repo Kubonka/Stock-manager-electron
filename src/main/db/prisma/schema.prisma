@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Item {
+  id          Int         @id @default(autoincrement())
+  ean         String
+  active      Boolean
+  description String      @default("")
+  buyPrice    Float
+  sellPrice   Float       @default(0)
+  stock       Int         @default(0)
+  lowStock    Int         @default(0)
+  categoryId  Int
+  category    Category    @relation(fields: [categoryId], references: [id])
+  sale        Sale?       @relation(fields: [saleId], references: [id])
+  saleId      Int?        @ignore // Internal foreign key, ignored in Prisma queries
+  saleItems   Sale_Item[] @relation("Item_SaleItem")
+
+  @@map("item")
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  active Boolean
+  name   String
+  items  Item[]
+
+  @@map("category")
+}
+
+model Sale {
+  id         Int         @id @default(autoincrement())
+  active     Boolean
+  date       DateTime    @default(now())
+  items      Item[]
+  totalPrice Float
+  saleItems  Sale_Item[] @relation("Sale_SaleItem")
+
+  @@map("sale")
+}
+
+model Sale_Item {
+  count    Int
+  subTotal Float
+  listId   Int
+  saleId   Int
+  itemId   Int
+  sale     Sale  @relation("Sale_SaleItem", fields: [saleId], references: [id], onDelete: Cascade)
+  item     Item  @relation("Item_SaleItem", fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([saleId, itemId])
+}
