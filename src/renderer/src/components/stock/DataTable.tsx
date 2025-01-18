@@ -1,4 +1,3 @@
-'use client'
 import React, { useState, CSSProperties, useRef, useEffect } from 'react'
 import { toast } from '../../hooks/use-toast'
 import {
@@ -24,22 +23,15 @@ import {
   getSortedRowModel
 } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '../ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { createItem, deleteItem, updateItem } from '../../serverActions/stockActions'
 import { getAllCategories } from '../../serverActions/categoryActions'
 import ManageProduct from './ManageProduct'
 import EANReader from './EANReader'
-import { Label } from '../ui/label'
+import { Plus } from 'lucide-react'
+import { Category, Item, TStatusMessage } from '../../../../../types'
 //todo V
 //import { deleteBudget } from "@/actions/budgets";
 interface DataTableProps<TData, TValue> {
@@ -62,6 +54,7 @@ export default function DataTable<TData extends Item, TValue>({
   data,
   refresh
 }: DataTableProps<TData, TValue>) {
+  const [pageSize] = useState(16)
   const [dialogEditOpen, setDialogEditOpen] = useState(false)
   const [manageProductVisible, setManageProductVisible] = useState(false)
   const [eanReaderVisible, setEanReaderVisible] = useState(false)
@@ -97,6 +90,13 @@ export default function DataTable<TData extends Item, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+
+    initialState: {
+      pagination: {
+        pageSize // Set the initial page size
+      }
+    },
+
     state: {
       sorting,
       columnFilters,
@@ -105,11 +105,12 @@ export default function DataTable<TData extends Item, TValue>({
     meta: {
       categories: categories,
       getRowStyles: (row: Row<TData>) => {
+        if (row.original.stock === 0) return { backgroundColor: '#550000', fontWeight: '500' }
         return row.original.stock <= row.original.lowStock
-          ? { backgroundColor: '#deaf21', fontWeight: '500' }
-          : { backgroundColor: '#7ee797', fontWeight: '500' }
+          ? { backgroundColor: '#595702', fontWeight: '500' }
+          : { backgroundColor: '#0f471d', fontWeight: '500' }
       },
-      navigateTo: (id: number) => {
+      navigateTo: () => {
         //todo V
         //router.push(`/budget/${id}`);
       },
@@ -171,14 +172,18 @@ export default function DataTable<TData extends Item, TValue>({
     setManageProductVisible(true)
   }
   const handleInputChange = (field: keyof Item, value: string | number) => {
-    console.log('E')
     setFormData((prev) => ({
       ...prev,
       [field]: value
     }))
-    console.log(formData)
   }
   function validateForm() {
+    if (formData.buyPrice < 0) return false
+    if (formData.categoryId === 0) return false
+    if (formData.description === '') return false
+    if (formData.lowStock < 0) return false
+    if (formData.sellPrice < 0) return false
+    if (formData.stock < 0) return false
     return true
   }
   async function handleSubmitForm() {
@@ -190,13 +195,13 @@ export default function DataTable<TData extends Item, TValue>({
     if (result.status === 'SUCCESS') {
       toast({
         description: 'Item modificado con éxito!',
-        duration: 3000
+        duration: 2000
       })
     } else {
       toast({
         variant: 'destructive',
         description: 'Hubo un error al modificar el Item',
-        duration: 3000
+        duration: 2000
       })
     }
     refresh()
@@ -208,23 +213,23 @@ export default function DataTable<TData extends Item, TValue>({
     if (result.status === 'SUCCESS') {
       toast({
         description: 'Item eliminado con éxito!',
-        duration: 3000
+        duration: 2000
       })
     } else {
       toast({
         variant: 'destructive',
         description: 'Hubo un error al eliminar el Item',
-        duration: 3000
+        duration: 2000
       })
     }
     refresh()
   }
   //note  MARKUP
   return (
-    <div>
-      <div className="flex flex-row justify-between bg-red-200 m-2 gap-6">
+    <div className="h-full">
+      <div className="flex flex-row justify-between m-2 gap-6">
         <div className="flex flex-col gap-2 items-center justify-center w-[85%]">
-          <div className=" flex flex-row items-center gap-6  justify-between w-full">
+          <div className=" flex flex-row items-center gap-6  justify-between w-full ">
             <Input
               placeholder="Buscar productos..."
               value={(table.getColumn('description')?.getFilterValue() as string) ?? ''}
@@ -235,9 +240,10 @@ export default function DataTable<TData extends Item, TValue>({
             />
             <Select
               onValueChange={(value) => {
-                if (value === 'all') table.getColumn('stock')?.setFilterValue(null)
-                if (value === 'true') table.getColumn('stock')?.setFilterValue(true)
-                if (value === 'false') table.getColumn('stock')?.setFilterValue(false)
+                if (value === '0') table.getColumn('stock')?.setFilterValue(0)
+                if (value === '1') table.getColumn('stock')?.setFilterValue(1)
+                if (value === '2') table.getColumn('stock')?.setFilterValue(2)
+                if (value === '3') table.getColumn('stock')?.setFilterValue(3)
               }}
             >
               <SelectTrigger className="w-[220px]">
@@ -245,9 +251,10 @@ export default function DataTable<TData extends Item, TValue>({
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="all">TODOS</SelectItem>
-                  <SelectItem value="true">STOCK NORMAL</SelectItem>
-                  <SelectItem value="false">STOCK BAJO</SelectItem>
+                  <SelectItem value="0">TODOS</SelectItem>
+                  <SelectItem value="1">STOCK NORMAL</SelectItem>
+                  <SelectItem value="2">STOCK BAJO</SelectItem>
+                  <SelectItem value="3">SIN STOCK</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -257,7 +264,7 @@ export default function DataTable<TData extends Item, TValue>({
                 else table.getColumn('category')?.setFilterValue(value)
               }}
             >
-              <SelectTrigger className="w-[220px]">
+              <SelectTrigger className="w-[320px]">
                 <SelectValue placeholder="Categorías" />
               </SelectTrigger>
               <SelectContent>
@@ -285,13 +292,14 @@ export default function DataTable<TData extends Item, TValue>({
               setDialogEditOpen(true)
             }}
           >
+            <Plus />
             Agregar Producto
           </Button>
         </div>
       </div>
 
       {/* //note TABLA */}
-      <div className="m-2 h-full rounded-md border">
+      <div className="m-2 h-fit rounded-md border-primary border-[1px] overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -308,7 +316,7 @@ export default function DataTable<TData extends Item, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="h-full">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -317,7 +325,10 @@ export default function DataTable<TData extends Item, TValue>({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className=" font-semibold tracking-wider text-[20px] h-12"
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -325,7 +336,7 @@ export default function DataTable<TData extends Item, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columns.length} className="h-24 text-center  ">
                   Sin resultados.
                 </TableCell>
               </TableRow>
@@ -371,8 +382,8 @@ export default function DataTable<TData extends Item, TValue>({
       </Dialog>
       {/* //$DIALOG EDIT*/}
       <Dialog open={dialogEditOpen} onOpenChange={setDialogEditOpen}>
-        <DialogContent className=" max-w-fit">
-          <DialogHeader className="text-center flex justify-center items-center font-semibold text-lg">
+        <DialogContent className=" max-w-fit border-2 border-primary">
+          <DialogHeader className="text-center flex justify-center items-center font-semibold text-lg text-foreground">
             {currentItem ? 'MODIFICAR PRODUCTO' : 'AGREGAR PRODUCTO'}
           </DialogHeader>
           <div className="w-[600px]">
@@ -393,6 +404,13 @@ export default function DataTable<TData extends Item, TValue>({
               onClick={() => {
                 if (validateForm()) {
                   handleSubmitForm()
+                  setDialogEditOpen(false)
+                } else {
+                  toast({
+                    variant: 'destructive',
+                    description: 'Campos incorrectos',
+                    duration: 2000
+                  })
                 }
               }}
               className={`${eanReaderVisible ? 'hidden' : ''} w-full`}

@@ -28,15 +28,15 @@ export function getLocalDate() {
   })
   return parseDate(date)
 }
-export function getObjectDate(date: string): TObjectDate {
-  //25/12/2023 <- date
-  const objDate = toStringObjectDate(date)
-  return {
-    year: parseInt(objDate.year),
-    month: parseInt(objDate.month),
-    day: parseInt(objDate.day)
-  }
-}
+// export function getObjectDate(date: string): TObjectDate {
+//   //25/12/2023 <- date
+//   const objDate = toStringObjectDate(date)
+//   return {
+//     year: parseInt(objDate.year),
+//     month: parseInt(objDate.month),
+//     day: parseInt(objDate.day)
+//   }
+// }
 function toStringObjectDate(date: string) {
   const [day, month, year] = date.split('/').map((part) => part.padStart(2, '0'))
   return { year, month, day }
@@ -44,31 +44,64 @@ function toStringObjectDate(date: string) {
 
 export function getStringMonth(month: number): string {
   switch (month) {
-    case 1:
+    case 0:
       return 'Enero'
-    case 2:
+    case 1:
       return 'Febrero'
-    case 3:
+    case 2:
       return 'Marzo'
-    case 4:
+    case 3:
       return 'Abril'
-    case 5:
+    case 4:
       return 'Mayo'
-    case 6:
+    case 5:
       return 'Junio'
-    case 7:
+    case 6:
       return 'Julio'
-    case 8:
+    case 7:
       return 'Agosto'
-    case 9:
+    case 8:
       return 'Septiembre'
-    case 10:
+    case 9:
       return 'Octubre'
-    case 11:
+    case 10:
       return 'Noviembre'
-    case 12:
+    case 11:
       return 'Diciembre'
     default:
       return ''
   }
+}
+export function getStringWeekDay(day: number) {
+  switch (day) {
+    case 1:
+      return 'Lunes'
+    case 2:
+      return 'Martes'
+    case 3:
+      return 'Miércoles'
+    case 4:
+      return 'Jueves'
+    case 5:
+      return 'Viernes'
+    case 6:
+      return 'Sábado'
+    case 7:
+      return 'Domingo'
+    default:
+      return ''
+  }
+}
+export function parsedDateArgentina(dateString: string): string {
+  const date = new Date(dateString)
+
+  const day = date.getUTCDate().toString().padStart(2, '0')
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0')
+  const year = date.getUTCFullYear()
+
+  const hours = date.getUTCHours().toString().padStart(2, '0')
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0')
+  const seconds = date.getUTCSeconds().toString().padStart(2, '0')
+
+  return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`
 }

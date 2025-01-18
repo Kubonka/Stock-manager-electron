@@ -1,3 +1,4 @@
+import { Category, TStatusMessage } from '../../../../types'
 import prisma from '../db'
 
 type TCategoryRepo = {
@@ -17,7 +18,7 @@ class CategoryRepo implements TCategoryRepo {
   }
   public async create(body: Category): Promise<TStatusMessage> {
     try {
-      const newCategory = await prisma.category.create({
+      await prisma.category.create({
         data: {
           name: body.name.toLowerCase(),
           active: true

@@ -1,4 +1,3 @@
-'use client'
 import { ColumnDef } from '@tanstack/react-table'
 import { MoreVertical, ArrowUpDown } from 'lucide-react'
 import { Button } from '../ui/button'
@@ -9,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '../ui/dropdown-menu'
+import { Item } from '../../../../../types'
 
 export const columns: ColumnDef<Item>[] = [
   {
@@ -87,7 +87,7 @@ export const columns: ColumnDef<Item>[] = [
       </p>
     ),
     enableColumnFilter: true,
-    filterFn: (row, columnId, filterValue) => {
+    filterFn: (row, _, filterValue) => {
       if (filterValue !== null) {
         const categoryId = row.original.categoryId
         return categoryId === parseInt(filterValue, 10)
@@ -144,19 +144,29 @@ export const columns: ColumnDef<Item>[] = [
       )
     },
     enableColumnFilter: true,
+
     filterFn: (row, columnId, filterValue) => {
-      if (filterValue !== null) {
-        const stockValue = row.getValue<number>(columnId)
-        const res = stockValue > row.original.lowStock
-        return res === filterValue
+      const stockValue = row.getValue<number>(columnId)
+      const delta = stockValue - row.original.lowStock
+      let result = 0
+      if (stockValue <= 0) result = 3
+      else {
+        if (delta > 0) {
+          //normal = 1
+          result = 1
+        } else if (delta < 0) {
+          //bajo = 2
+          result = 2
+        }
       }
+      if (filterValue !== 0) return filterValue === result
       return true
     },
     cell: ({ row }) => <p className="w-full text-center text-[12px]">{row.original.stock}</p>
   },
   {
     id: 'actions',
-    header: ({ column }) => {
+    header: () => {
       return <div className="w-full"></div>
     },
     cell: ({ row, table }) => {

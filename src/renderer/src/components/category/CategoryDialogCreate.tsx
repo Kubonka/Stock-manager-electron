@@ -1,5 +1,4 @@
-'use client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FileEdit } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
@@ -13,15 +12,9 @@ import {
 } from '../ui/dialog'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '../ui/select'
+
 import FormAlert from '../FormAlert'
+import { Category } from '../../../../../types'
 
 //! ########################
 type CategoryDialogProps = {
@@ -30,7 +23,7 @@ type CategoryDialogProps = {
   onSubmit: (categoryData: Category) => void
 }
 function CategoryDialogCreate({ create, data, onSubmit }: CategoryDialogProps) {
-  const [selecting, setSelecting] = useState(false)
+  const [selecting] = useState(false)
   const [open, setOpen] = useState(false)
   const [error, setError] = useState(false)
   const [categoryData, setCategoryData] = useState<Category>({} as Category)
@@ -95,11 +88,13 @@ function CategoryDialogCreate({ create, data, onSubmit }: CategoryDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] border-2 border-primary">
         <DialogHeader>
-          <DialogTitle>{create ? 'Crear Categoría' : 'Editar Categoría'}</DialogTitle>
-          <DialogDescription>
-            Realiza cambios en tu categoría aca. Hace click en guardar cambios cuando termines.
+          <DialogTitle className="text-center flex justify-center items-center font-semibold text-lg text-foreground">
+            {create ? 'Crear Categoría' : 'Editar Categoría'}
+          </DialogTitle>
+          <DialogDescription className="text-center flex justify-center items-center font-semibold text-md text-foreground">
+            Realiza cambios en tu categoría. Hace click en guardar cambios cuando termines.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">

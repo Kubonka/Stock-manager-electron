@@ -6,3 +6,12 @@ export async function createDummyDb() {
     console.error('Error communicating with main process:', error)
   }
 }
+export async function testIpc() {
+  try {
+    const res = await window.electronAPI.ipcRenderer.invoke('test')
+    console.log(res)
+    return res
+  } catch (error) {
+    console.error('Error communicating with main process:', error)
+  }
+}

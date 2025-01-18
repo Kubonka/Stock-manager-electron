@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getAllItems } from '../serverActions/stockActions'
 import DataTable from '../components/stock/DataTable'
 import { columns } from '../components/stock/columns'
+import { Item } from '../../../../types'
 
 function Stock() {
   const [itemsTableData, setItemsTableData] = useState<Item[]>([] as Item[])
@@ -14,11 +15,7 @@ function Stock() {
     loadItems()
   }, [])
   //note  MARKUP
-  return (
-    <div className="h-full w-full">
-      <DataTable columns={columns} data={itemsTableData} refresh={() => loadItems()} />
-    </div>
-  )
+  return <DataTable columns={columns} data={itemsTableData} refresh={() => loadItems()} />
 }
 
 export default Stock

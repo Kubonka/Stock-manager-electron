@@ -6,45 +6,52 @@ import DummyDb from './db/DummyDb'
 
 export default function databaseHandlers(): void {
   //*CATEGORY
-  ipcMain.handle('getAllCategories', async (event, args) => {
+  ipcMain.handle('getAllCategories', async (_, __) => {
     return CategoryRepo.getInstance().getAll()
   })
-  ipcMain.handle('createCategory', async (event, args) => {
+  ipcMain.handle('createCategory', async (_, args) => {
     return CategoryRepo.getInstance().create(args)
   })
-  ipcMain.handle('updateCategory', async (event, args) => {
+  ipcMain.handle('updateCategory', async (_, args) => {
     return CategoryRepo.getInstance().update(args)
   })
-  ipcMain.handle('deleteCategory', async (event, args) => {
+  ipcMain.handle('deleteCategory', async (_, args) => {
     return CategoryRepo.getInstance().delete(args)
   })
   //*ITEM
-  ipcMain.handle('createItem', async (event, args) => {
+  ipcMain.handle('createItem', async (_, args) => {
     console.log('create')
     return ItemRepo.getInstance().create(args)
   })
-  ipcMain.handle('updateItem', async (event, args) => {
+  ipcMain.handle('updateItem', async (_, args) => {
     return ItemRepo.getInstance().update(args)
   })
-  ipcMain.handle('deleteItem', async (event, args) => {
+  ipcMain.handle('deleteItem', async (_, args) => {
     console.log('args', args)
     return ItemRepo.getInstance().delete(args)
   })
-  ipcMain.handle('getAllItems', async (event, args) => {
+  ipcMain.handle('getAllItems', async (_, __) => {
     return ItemRepo.getInstance().getAll()
   })
   //*SALE
-  ipcMain.handle('createSale', async (event, args) => {
+  ipcMain.handle('createSale', async (_, args) => {
     return SaleRepo.getInstance().create(args)
   })
-  ipcMain.handle('deleteSale', async (event, args) => {
+  ipcMain.handle('deleteSale', async (_, args) => {
     return SaleRepo.getInstance().delete(args)
   })
-  ipcMain.handle('getSalesByDay', async (event, args) => {
+  ipcMain.handle('getSalesByDay', async (_, args) => {
     return SaleRepo.getInstance().getByDay(args)
   })
+  //*STATISTICS
+  ipcMain.handle('getStatistics', async (_, args) => {
+    return SaleRepo.getInstance().getStatistics(args)
+  })
   //*DEVELOPER
-  ipcMain.handle('createDummyDb', async (event, args) => {
+  ipcMain.handle('createDummyDb', async (_, __) => {
     return new DummyDb()
+  })
+  ipcMain.handle('test', async (_, __) => {
+    return '2'
   })
 }

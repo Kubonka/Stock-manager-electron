@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Trash2 } from 'lucide-react'
+import { Category } from '../../../../../types'
 type Props = {
   onDelete: (category: Category) => void
   category: Category
@@ -12,15 +13,17 @@ export default function CategoryDialogDelete({ onDelete, category }: Props) {
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger>
         <Button
-          className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-primary p-1"
+          className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-primary p-1 "
           variant={'outline'}
           asChild
         >
           <Trash2 className="text-white" size={20} />
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>Desea eliminar la categoría ?</DialogHeader>
+      <DialogContent className=" border-2 border-primary">
+        <DialogHeader className="text-center flex justify-center items-center font-semibold text-lg text-foreground">
+          Desea eliminar la categoría ?
+        </DialogHeader>
         <DialogFooter className="flex flex-row gap-4">
           <Button type="submit" onClick={() => setDialogOpen(false)} className="w-full">
             Cancelar

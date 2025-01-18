@@ -1,6 +1,9 @@
+import { Category } from '../../../../types'
+
 export async function getAllCategories() {
   try {
     const res = await window.electronAPI.ipcRenderer.invoke('getAllCategories')
+
     return res
   } catch (error) {
     console.error('Error communicating with main process:', error)

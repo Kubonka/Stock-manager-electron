@@ -6,10 +6,22 @@
 //     console.error('Error communicating with main process:', error)
 //   }
 //   //return 2
+
+import { CartItem } from '../../../../types'
+
 // }
 export async function createSale(cartItems: CartItem[]) {
   try {
     const res = await window.electronAPI.ipcRenderer.invoke('createSale', cartItems)
+
+    return res
+  } catch (error) {
+    console.error('Error communicating with main process:', error)
+  }
+}
+export async function deleteSale(saleId: number) {
+  try {
+    const res = await window.electronAPI.ipcRenderer.invoke('deleteSale', saleId)
 
     return res
   } catch (error) {

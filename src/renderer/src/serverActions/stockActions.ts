@@ -1,3 +1,5 @@
+import { Item } from '../../../../types'
+
 export async function getAllItems() {
   try {
     const res = await window.electronAPI.ipcRenderer.invoke('getAllItems')
@@ -25,7 +27,6 @@ export async function updateItem(item: Item) {
 }
 export async function createItem(item: Item) {
   try {
-    console.log('ce')
     const res = await window.electronAPI.ipcRenderer.invoke('createItem', item)
     return res
   } catch (error) {

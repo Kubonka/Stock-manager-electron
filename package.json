@@ -11,14 +11,16 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "start": "electron-vite preview",
+    "start": "electron-forge start",
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -29,6 +31,7 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-popover": "^1.1.4",
     "@radix-ui/react-select": "^2.1.2",
+    "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.2",
     "@tanstack/react-table": "^8.20.6",
@@ -37,25 +40,36 @@
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",
+    "electron-log": "^5.2.4",
     "electron-router-dom": "^2.0.0",
+    "electron-squirrel-startup": "^1.0.1",
     "electron-updater": "^6.1.7",
     "lucide-react": "^0.468.0",
     "react-day-picker": "^8.10.1",
     "react-router-dom": "^7.0.2",
+    "recharts": "^2.15.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/maker-deb": "^7.6.0",
+    "@electron-forge/maker-rpm": "^7.6.0",
+    "@electron-forge/maker-squirrel": "^7.6.0",
+    "@electron-forge/maker-zip": "^7.6.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
+    "@electron-forge/plugin-fuses": "^7.6.0",
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
     "@electron-toolkit/eslint-config-ts": "^2.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@electron/fuses": "^1.8.0",
     "@types/node": "^20.14.8",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "electron": "^31.0.2",
-    "electron-builder": "^24.13.3",
+    "electron-builder": "^25.1.8",
     "electron-vite": "^2.3.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.3",
@@ -70,5 +84,27 @@
   },
   "prisma": {
     "schema": "src/main/db/prisma/schema.prisma"
+  },
+  "build": {
+    "files": [
+      "**/*",
+      "!node_modules/.cache/**",
+      ".env"
+    ],
+    "asarUnpack": "**\\*.{node,dll}",
+    "extraResources": [
+      "src/main/db/prisma/**/*",
+      "node_modules/.prisma/**/*",
+      "node_modules/@prisma/client/**/*",
+      {
+        "from": "src/main/db/prisma/dev.db",
+        "to": "prisma/dev.db"
+      },
+      {
+        "from": ".env",
+        "to": ".env"
+      }
+    ],
+    "appId": "com.betocorp.kubonka"
   }
 }

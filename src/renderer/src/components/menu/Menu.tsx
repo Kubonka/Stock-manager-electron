@@ -1,11 +1,10 @@
-import React from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '../ui/dropdown-menu'
 import { Button } from '../ui/button'
@@ -15,31 +14,33 @@ import { Label } from '../ui/label'
 function Menu() {
   //!IMPLEMENTAR NAV BAR
   const navigate = useNavigate()
-  const a = 0
+  const [title, setTitle] = useState('LA JUANITA')
   return (
     <div className="flex flex-row justify-around m-2">
-      <Label className="w-[90%] text-center text-red-400 font-bold text-lg">LA JUANITA</Label>
+      <Label className="w-[90%] text-center text-foreground font-bold text-lg">{title}</Label>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="rounded-full bg-slate-600 w-10 h-10" size="icon">
+          <Button className="rounded-full bg-primary w-10 h-10" size="icon">
             <MenuIcon strokeWidth={2} size={24} />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className=" w-[170px] bg-slate-600">
-          <DropdownMenuLabel className="text-[16px] font-bold">MENU</DropdownMenuLabel>
+        <DropdownMenuContent className=" w-[270px] bg-background border-2 border-primary">
+          <DropdownMenuLabel className="text-[16px] font-bold text-center">MENU</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => {
               navigate('/')
+              setTitle('LA JUANITA')
             }}
-            className="ml-2 text-[16px] font-semibold"
+            className="text-[16px] font-semibold cursor-pointer"
           >
             Procesar Compras
           </DropdownMenuItem>
           <DropdownMenuItem
-            className="ml-2 text-[16px] font-semibold"
+            className="text-[16px] font-semibold cursor-pointer"
             onClick={() => {
               navigate('/stock')
+              setTitle('ADMINISTRAR STOCK')
             }}
           >
             Administrar Stock
@@ -47,27 +48,39 @@ function Menu() {
           <DropdownMenuItem
             onClick={() => {
               navigate('/sale-inspector')
+              setTitle('HISTORIAL DE VENTAS')
             }}
-            className="ml-2 text-[16px] font-semibold"
+            className="text-[16px] font-semibold cursor-pointer"
           >
             Historial de ventas
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
-              navigate('/categories')
+              navigate('/statistics')
+              setTitle('ESTADISTICAS')
             }}
-            className="ml-2 text-[16px] font-semibold"
+            className="text-[16px] font-semibold cursor-pointer"
           >
-            Administrar Categorias
+            Estadisticas
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
-              navigate('/developer')
+              navigate('/categories')
+              setTitle('ADMINISTRAR CATEGORIAS')
             }}
-            className="ml-2 text-[16px] font-semibold"
+            className="text-[16px] font-semibold cursor-pointer"
+          >
+            Administrar Categorias
+          </DropdownMenuItem>
+          {/* <DropdownMenuItem
+            onClick={() => {
+              navigate('/developer')
+              setTitle('DEV')
+            }}
+            className="text-[16px] font-semibold cursor-pointer"
           >
             Developer
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

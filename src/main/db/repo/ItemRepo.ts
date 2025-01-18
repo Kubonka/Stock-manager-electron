@@ -1,5 +1,7 @@
+import { Item, TStatusMessage } from '../../../../types'
 import prisma from '../db'
-
+import log from 'electron-log'
+import { app } from 'electron'
 type TItemRepo = {
   create(body: Item): Promise<TStatusMessage>
   update(body: Item): Promise<TStatusMessage>
@@ -19,7 +21,7 @@ export default class ItemRepo implements TItemRepo {
     try {
       console.log('CREATE')
       const { id, ...rest } = body
-      const newItem = await prisma.item.create({
+      await prisma.item.create({
         data: {
           ...rest
         }
@@ -93,12 +95,16 @@ export default class ItemRepo implements TItemRepo {
   }
   public async getAll(): Promise<Item[]> {
     try {
+      log.info(`entra a getAll`)
+      log.info(`${app.getPath('userData')}`)
+      log.info(`${process.env.DATABSE_URL}`)
       const res = await prisma.item.findMany({
         where: { active: true }
       })
 
       return res
     } catch (error) {
+      log.info(error)
       throw new Error('Failed to get items')
     }
   }

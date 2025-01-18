@@ -1,5 +1,4 @@
-'use client'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from '../hooks/use-toast'
 
 import {
@@ -23,14 +22,15 @@ import {
   getAllCategories,
   updateCategory
 } from '../serverActions/categoryActions'
+import { Category, TStatusMessage } from '../../../../types'
+import { Separator } from '../components/ui/separator'
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [_, setSelectedCategory] = useState<Category | null>(null)
 
   async function loadAllCategories() {
     const res = await getAllCategories()
-    console.log('res1', res)
     setCategories(res)
   }
   useEffect(() => {
@@ -45,12 +45,12 @@ export default function Categories() {
       if (!categoryData.id) {
         result = await createCategory(categoryData)
         if (result.status && result.status === 'SUCCESS') {
-          toast({ description: 'Categoría creada con éxito!', duration: 3000 })
+          toast({ description: 'Categoría creada con éxito!', duration: 2000 })
         } else {
           toast({
             variant: 'destructive',
             description: 'Hubo un error al crear la categoria',
-            duration: 3000
+            duration: 2000
           })
         }
       } else {
@@ -58,13 +58,13 @@ export default function Categories() {
         if (result.status && result.status === 'SUCCESS') {
           toast({
             description: 'Categoría actualizada con éxito!',
-            duration: 3000
+            duration: 2000
           })
         } else {
           toast({
             variant: 'destructive',
             description: 'Hubo un error al actualizar la categoria',
-            duration: 3000
+            duration: 2000
           })
         }
       }
@@ -79,13 +79,13 @@ export default function Categories() {
       if (result.status === 'SUCCESS') {
         toast({
           description: 'Categoría eliminada con éxito!',
-          duration: 3000
+          duration: 2000
         })
       } else {
         toast({
           variant: 'destructive',
           description: 'Hubo un error al eliminar la categoria',
-          duration: 3000
+          duration: 2000
         })
       }
       loadAllCategories()
@@ -96,52 +96,53 @@ export default function Categories() {
   //reference MARKUP
 
   return (
-    <Card className=" pt-2">
-      <CardContent>
-        <Table className="">
-          <TableCaption>Lista de las categorías creadas.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-full">
-                <div className="flex flex-row justify-between">
-                  <p className="pt-2 font-bold">CATEGORIA</p>
-                  <CategoryDialogCreate
-                    create={true}
-                    data={{
-                      name: '',
-                      id: 0,
-                      active: true
-                    }}
-                    onSubmit={handleSubmit}
-                  />
-                </div>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.map((category: Category) => (
-              <TableRow key={category.id}>
-                <TableCell className="flex flex-row items-center justify-between font-medium">
-                  <div className="w-full ">{capitalize(category.name)}</div>
-                  <div className="flex h-8 w-20 justify-around ">
+    <div className=" w-full h-[1080px]">
+      <Card className=" pt-2 h-full overflow-y-auto border-0 overflow-auto">
+        <CardContent className="border-2 border-primary rounded-md p-2 h-full">
+          <Table className="">
+            <TableCaption>Lista de las categorías creadas.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-full">
+                  <div className="flex flex-row justify-between">
+                    <p className="pt-2 font-bold">CATEGORIA</p>
                     <CategoryDialogCreate
-                      create={false}
+                      create={true}
                       data={{
-                        ...category
+                        name: '',
+                        id: 0,
+                        active: true
                       }}
                       onSubmit={handleSubmit}
                     />
-                    <CategoryDialogDelete onDelete={handleDelete} category={category} />
                   </div>
-                </TableCell>
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-          <TableFooter>
-            <TableRow></TableRow>
-          </TableFooter>
-        </Table>
-      </CardContent>
-    </Card>
+            </TableHeader>
+            <TableBody>
+              {categories.map((category: Category) => (
+                <TableRow key={category.id}>
+                  <TableCell className="flex flex-row items-center justify-between font-medium">
+                    <div className="w-full ">{capitalize(category.name)}</div>
+                    <div className="flex h-8 w-20 justify-around ">
+                      <CategoryDialogCreate
+                        create={false}
+                        data={{
+                          ...category
+                        }}
+                        onSubmit={handleSubmit}
+                      />
+                      <CategoryDialogDelete onDelete={handleDelete} category={category} />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <Separator className="bg-primary mt-2" />
+            <TableFooter></TableFooter>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

@@ -8,7 +8,6 @@ const api = {}
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
 if (process.contextIsolated) {
-  console.log('CONTEXT')
   try {
     contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer: {
@@ -17,7 +16,7 @@ if (process.contextIsolated) {
           ipcRenderer.send(channel, ...args)
         },
         on: (channel: string, listener: (...args: any[]) => void) => {
-          ipcRenderer.on(channel, (event, ...args) => listener(...args))
+          ipcRenderer.on(channel, (_, ...args) => listener(...args))
         },
         removeListener: (channel: string, listener: (...args: any[]) => void) => {
           ipcRenderer.removeListener(channel, listener)

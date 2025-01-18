@@ -1,15 +1,37 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import databaseHandlers from './databaseHandlers'
+import './db/db' // Ensures the database setup logic is executed
+import log from 'electron-log'
 
+// Optional: Initialize for renderer processes
+log.initialize()
+
+// Set log level for production
+log.transports.file.resolvePathFn = () => join(app.getPath('userData'), 'logs/main.log')
+log.transports.file.level = app.isPackaged ? 'info' : 'debug' // 'info' in production, 'debug' in dev
+log.transports.console.level = app.isPackaged ? 'info' : 'debug'
+
+// log.transports.file.level = 'info'; // Logs only 'info' and above
+// log.transports.console.level = 'info'; // Also enable console logs if needed
+// log.transports.file.resolvePathFn = () => join(app.getPath('userData'), 'logs/main.log');
+
+// Catch unhandled errors and promises
+log.errorHandler.startCatching()
+
+// Optional: Start logging Electron events (useful for debugging crashes)
+log.eventLogger.startLogging()
+
+if (require('electron-squirrel-startup')) app.quit()
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
+    width: 1920,
+    height: 1080,
     show: false,
     autoHideMenuBar: true,
+    title: 'La Juanita',
     ...(process.platform === 'linux' ? {} : {}),
 
     webPreferences: {
@@ -23,12 +45,11 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
-
+  mainWindow.webContents.openDevTools({ mode: 'bottom' })
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
-
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -52,7 +73,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // !! START !!
+  // !! ------------------------------ START !! -----------------------------------
+  //!ARREGLAR EL INPUT DE CREAR PRODUCTO EN RENDERER
+
   databaseHandlers()
   createWindow()
 

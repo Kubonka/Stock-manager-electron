@@ -1,6 +1,7 @@
-import prisma from './db'
+import prisma from '../db/db'
 import ItemRepo from './repo/ItemRepo'
 import CategoryRepo from './repo/CategoryRepo'
+import { CartItem, Category, Item } from '../../../types'
 
 export default class DummyDB {
   categories: Category[] = []
@@ -13,7 +14,8 @@ export default class DummyDB {
     this.items = items
     await this.createCategories()
     await this.createItems()
-  }
+    await this.createSales()
+  } //
   private async createCategories() {
     const categoriesPromises = categories.map((category) =>
       CategoryRepo.getInstance().create(category)
@@ -25,158 +27,256 @@ export default class DummyDB {
     await Promise.all(itemsPromises)
   }
   private async createSales() {
-    //todo cantidad de dias 5
-    //todo cantidad de sales 20
-    const baseDate = new Date('Mon Dec 22 2024 04:44:58 GMT-0300 (Argentina Standard Time)')
-    for (let day = 0; day < 5; day++) {
-      //todo usando el array de sales crear arrays de sales con items random
-      baseDate.setDate(baseDate.getDate() + 1)
+    //let baseDate = new Date('Mon Oct 01 2024 00:00:01 GMT-0300 (Argentina Standard Time)')
+    const startOfMonth = new Date('2024-10-01T00:00:01Z') // Start of the month
+    //! 5 compras por hora -> desde las 6 a las 24 (18) -> todos los dias (365)
+    for (let day = 0; day < 150; day++) {
+      const currentDay = new Date(startOfMonth)
+      currentDay.setDate(startOfMonth.getDate() + day) // Ensure proper day calculation
+      console.log('day :', day, 'currentDay :', currentDay)
+
+      for (let hour = 0; hour < 23; hour++) {
+        for (let saleByHour = 0; saleByHour < 3; saleByHour++) {
+          const saleDate = new Date(currentDay) // Reset to the specific day
+          saleDate.setHours(hour, 0, 0, 0) // Set hour specifically
+          await this.createDummySale(saleDate)
+        }
+      }
     }
+    // for (let day = 1; day <= 30; day++) {
+    //   console.log('day :', day)
+    //   for (let hour = 0; hour < 23; hour++) {
+    //     for (let saleByHour = 0; saleByHour < 3; saleByHour++) {
+    //       await this.createDummySale(new Date(baseDate))
+    //     }
+    //     baseDate = new Date(baseDate.getTime() + 3600000)
+    //   }
+    //   baseDate.setDate(baseDate.getDate() + 1)
+    // }
+
+    //!
+    // for (let day = 0; day < 10; day++) {
+    //   //const items = await this.generateCartItems(Math.floor(Math.random() * 45 + 2))
+    //   //console.log('items', items)
+    //   for (let i = 0; i < 45; i++) {
+    //     await this.createDummySale(baseDate)
+    //   }
+
+    //   baseDate.setDate(baseDate.getDate() + 1)
+    // }
+  }
+  private async createDummySale(baseDate: Date) {
+    try {
+      const cartItems = await this.generateCartItems(Math.floor(Math.random() * 15 + 2))
+      const saleItemsData = cartItems.map((item) => ({
+        subTotal: item.subTotal,
+        count: item.count,
+        listId: item.listId,
+        item: { connect: { id: item.id } } // connecting the item via itemId
+      }))
+
+      // Calculate total price
+      const totalPrice = cartItems.reduce((prev, curr) => prev + curr.count * curr.subTotal, 0)
+
+      // Create sale with associated items
+      await prisma.sale.create({
+        data: {
+          active: true,
+          date: baseDate,
+          totalPrice: totalPrice,
+          saleItems: {
+            create: saleItemsData // This creates multiple Sale_Item entries in the intermediate table
+          }
+        }
+      })
+      //!
+      // for (let i = 0; i < salesToAdd.length; i++) {
+      //   const saleToAdd = salesToAdd[i]
+
+      //   const saleItems = saleToAdd.items.map((item) => ({
+      //     subTotal: item.subTotal,
+      //     count: item.count,
+      //     listId: item.listId,
+      //     item: { connect: { id: item.id } }
+      //   }))
+      //   console.log('saleItems[0].count', saleItems[0].count)
+      //   await prisma.sale.create({
+      //     data: {
+      //       active: true,
+      //       date: saleToAdd.date,
+      //       totalPrice: saleToAdd.totalPrice,
+      //       saleItems: {
+      //         create: saleItems
+      //       }
+      //     }
+      //   })
+      // }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  private async generateCartItems(itemsToAdd: number): Promise<CartItem[]> {
+    const allItems = await prisma.item.findMany({ where: { active: true } })
+    const result: CartItem[] = []
+    for (let i = 0; i < itemsToAdd; i++) {
+      const rndPos = Math.floor(Math.random() * 19 + 1)
+      const rndItem: Item = allItems.find((i) => i.id === rndPos) as Item
+
+      const count = Math.floor(Math.random() * 3 + 1)
+      const newCartItem: CartItem = {
+        ...rndItem,
+        count: count,
+        listId: itemsToAdd + 1,
+        subTotal: count * rndItem.sellPrice
+      }
+      result.push(newCartItem)
+    }
+    return result
   }
 }
 
-const sales: Sale[] = [
-  {
-    active: true,
-    id: 1,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 2,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 3,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 4,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 5,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 6,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 7,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 8,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 9,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 10,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 11,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 12,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 13,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 14,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 15,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 16,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 17,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 18,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 19,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  },
-  {
-    active: true,
-    id: 20,
-    totalPrice: 2000,
-    date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
-    items: []
-  }
-]
+// const salesEsqueleton: Sale[] = [
+//   {
+//     active: true,
+//     id: 1,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 2,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 3,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 4,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 5,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 6,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 7,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 8,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 9,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 10,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 11,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 12,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 13,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 14,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 15,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 16,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 17,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 18,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 19,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   },
+//   {
+//     active: true,
+//     id: 20,
+//     totalPrice: 2000,
+//     date: new Date('Mon Dec 23 2024 04:44:58 GMT-0300 (Argentina Standard Time)'),
+//     items: []
+//   }
+// ]
 
 const categories: Category[] = [
   {

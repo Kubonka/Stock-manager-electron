@@ -49,6 +49,7 @@ model Sale {
 }
 
 model Sale_Item {
+  id       Int   @id @default(autoincrement())
   count    Int
   subTotal Float
   listId   Int
@@ -56,6 +57,4 @@ model Sale_Item {
   itemId   Int
   sale     Sale  @relation("Sale_SaleItem", fields: [saleId], references: [id], onDelete: Cascade)
   item     Item  @relation("Item_SaleItem", fields: [itemId], references: [id], onDelete: Cascade)
-
-  @@id([saleId, itemId])
 }

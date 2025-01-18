@@ -1,17 +1,22 @@
 import React, { useRef, useState, useEffect } from 'react'
+import { Input } from '../ui/input'
 
 type Props = {
   onSubmit: (cant: number, code: string) => void
+  focusInputTrigger: boolean
   clearInputTrigger: boolean
 }
 
-function CodeInput({ onSubmit, clearInputTrigger }: Props) {
+function CodeInput({ onSubmit, clearInputTrigger, focusInputTrigger }: Props) {
   const [barCode, setBarCode] = useState<string>('')
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     setBarCode('')
   }, [clearInputTrigger])
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [focusInputTrigger])
 
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     let code = event.target.value
@@ -34,8 +39,6 @@ function CodeInput({ onSubmit, clearInputTrigger }: Props) {
         count = parseInt(barCode.slice(0, xPos - 1), 10)
         code = barCode.slice(xPos + 2)
       }
-      console.log('count', count)
-      console.log('code', code)
       onSubmit(count, code)
     } else if (event.key === 'Backspace') {
       event.preventDefault()
@@ -44,15 +47,14 @@ function CodeInput({ onSubmit, clearInputTrigger }: Props) {
   }
 
   return (
-    <div>
-      CodeInput
-      <input
-        ref={inputRef}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        value={barCode}
-      />
-    </div>
+    <Input
+      ref={inputRef}
+      onChange={handleInputChange}
+      onKeyDown={handleKeyDown}
+      value={barCode}
+      className="w-full h-20 font-[30px] md:text-[30px] border-2 bg-slate-900 -ml-2"
+      autoFocus
+    />
   )
 }
 

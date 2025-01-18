@@ -10,10 +10,11 @@ import Categories from './routes/Categories'
 import { Toaster } from './components/ui/toaster'
 import Developer from './routes/Developer'
 import SaleInspector from './routes/SaleInspector'
+import Statistics from './routes/Statistics'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <div className="box-border w-screen h-screen bg-slate-300 relative flex flex-col">
+    <div className="box-border w-screen h-screen bg-background relative flex flex-col p-2  overflow-hidden">
       <HashRouter>
         <Toaster />
         <Menu />
@@ -22,9 +23,12 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           <Route path="/sale-inspector" element={<SaleInspector />} />
           <Route path="/stock" element={<Stock />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/statistics" element={<Statistics />} />
           <Route path="/developer" element={<Developer />} />
         </Routes>
       </HashRouter>
     </div>
   </React.StrictMode>
 )
+
+//todo calcular el alto de la ventana y en base a eso decidir cuantos elementos se muestran en la tabla de stock
