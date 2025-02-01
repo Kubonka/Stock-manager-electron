@@ -2,7 +2,8 @@ import { ipcMain } from 'electron'
 import CategoryRepo from './db/repo/CategoryRepo'
 import ItemRepo from './db/repo/ItemRepo'
 import SaleRepo from './db/repo/SaleRepo'
-import DummyDb from './db/DummyDb'
+//import DummyDb from './db/DummyDb'
+import DBMigrator from './db/DBMigrator'
 
 export default function databaseHandlers(): void {
   //*CATEGORY
@@ -20,14 +21,12 @@ export default function databaseHandlers(): void {
   })
   //*ITEM
   ipcMain.handle('createItem', async (_, args) => {
-    console.log('create')
     return ItemRepo.getInstance().create(args)
   })
   ipcMain.handle('updateItem', async (_, args) => {
     return ItemRepo.getInstance().update(args)
   })
   ipcMain.handle('deleteItem', async (_, args) => {
-    console.log('args', args)
     return ItemRepo.getInstance().delete(args)
   })
   ipcMain.handle('getAllItems', async (_, __) => {
@@ -48,10 +47,18 @@ export default function databaseHandlers(): void {
     return SaleRepo.getInstance().getStatistics(args)
   })
   //*DEVELOPER
-  ipcMain.handle('createDummyDb', async (_, __) => {
-    return new DummyDb()
-  })
+  // ipcMain.handle('createDummyDb', async (_, __) => {
+  //   return new DummyDb()
+  // })
   ipcMain.handle('test', async (_, __) => {
     return '2'
+  })
+  ipcMain.handle('migrateDB', async (_, __) => {
+    const dbMigrator = new DBMigrator()
+    await dbMigrator.init()
+  })
+  ipcMain.handle('writeDB', async (_, __) => {
+    const dbMigrator = new DBMigrator()
+    await dbMigrator.writeToDB()
   })
 }

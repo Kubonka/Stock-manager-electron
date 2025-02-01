@@ -10,19 +10,14 @@ declare global {
 }
 /* eslint-enable no-var */
 
-//const isProduction = process.env.NODE_ENV === 'production'
-const isProduction = process.env.NODE_ENV === 'production2'
+const isProduction = process.env.NODE_ENV === 'production'
+//const isProduction = process.env.NODE_ENV === 'production2'
 
 // Determine the database path
 const dbPath = isProduction
   ? path.join(app.getPath('userData'), 'db/dev.db') // In production: writable location
   : path.join('file:/dev.db') // In development: source location
 //: path.join('file:', __dirname, '../db/prisma/dev.db') // In development: source location
-log.info(`dbPath ${dbPath}`)
-log.info(`databaseURL ${process.env.DATABASE_URL}`)
-log.info(`NODE ENV ${process.env.NODE_ENV}`)
-console.log(`NODE ENV ${process.env.NODE_ENV}`)
-console.log(`NODE ENV ${process.env.DATABASE_URL}`)
 // Ensure the database file exists in production
 if (isProduction) {
   try {

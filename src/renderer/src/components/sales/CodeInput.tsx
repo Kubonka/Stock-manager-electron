@@ -5,19 +5,38 @@ type Props = {
   onSubmit: (cant: number, code: string) => void
   focusInputTrigger: boolean
   clearInputTrigger: boolean
+  overrideInput: string
 }
 
-function CodeInput({ onSubmit, clearInputTrigger, focusInputTrigger }: Props) {
+function CodeInput({ onSubmit, clearInputTrigger, focusInputTrigger, overrideInput }: Props) {
   const [barCode, setBarCode] = useState<string>('')
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     setBarCode('')
+    inputRef.current?.focus()
   }, [clearInputTrigger])
   useEffect(() => {
     inputRef.current?.focus()
   }, [focusInputTrigger])
 
+  useEffect(() => {
+    if (overrideInput !== '') {
+      setBarCode((p) => p + overrideInput)
+      setTimeout(() => simulateEnterKeyPress(), 200)
+    }
+  }, [overrideInput])
+
+  const simulateEnterKeyPress = () => {
+    const event = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      code: 'Enter',
+      keyCode: 13,
+      charCode: 13,
+      bubbles: true
+    })
+    inputRef.current?.dispatchEvent(event)
+  }
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     let code = event.target.value
     if (/(\s|\*)$/.test(code)) {
@@ -43,6 +62,10 @@ function CodeInput({ onSubmit, clearInputTrigger, focusInputTrigger }: Props) {
     } else if (event.key === 'Backspace') {
       event.preventDefault()
       setBarCode((prev) => prev.slice(0, -1))
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      console.log('ESCAPE')
+      setBarCode('')
     }
   }
 
@@ -52,7 +75,7 @@ function CodeInput({ onSubmit, clearInputTrigger, focusInputTrigger }: Props) {
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
       value={barCode}
-      className="w-full h-20 font-[30px] md:text-[30px] border-2 bg-slate-900 -ml-2"
+      className="w-full h-20 font-[30px] md:text-[30px] border-2 bg-slate-900 "
       autoFocus
     />
   )

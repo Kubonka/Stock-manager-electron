@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { MoreVertical, ArrowUpDown } from 'lucide-react'
+import { MoreVertical, ArrowUpDown, BadgeAlert, BadgeX } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger
 } from '../ui/dropdown-menu'
 import { Item } from '../../../../../types'
+import { parseDateToDashed } from '../../lib/utils'
 
 export const columns: ColumnDef<Item>[] = [
   {
@@ -154,7 +155,7 @@ export const columns: ColumnDef<Item>[] = [
         if (delta > 0) {
           //normal = 1
           result = 1
-        } else if (delta < 0) {
+        } else if (delta <= 0) {
           //bajo = 2
           result = 2
         }
@@ -163,6 +164,58 @@ export const columns: ColumnDef<Item>[] = [
       return true
     },
     cell: ({ row }) => <p className="w-full text-center text-[12px]">{row.original.stock}</p>
+  },
+  {
+    accessorKey: 'expirationDate',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="w-full text-center text-[12px] font-bold"
+        >
+          VENCIMIENTO
+          <ArrowUpDown className="ml-[2px] h-4 w-4" />
+        </Button>
+      )
+    },
+    enableColumnFilter: true,
+
+    filterFn: (row, columnId, filterValue) => {
+      if (columnId) {
+      }
+      const expirationDate = row.original.expirationDate
+      const expirationAlert = row.original.expirationAlert
+      switch (filterValue) {
+        case 1:
+          return expirationAlert !== -1 && resolveExpiration(expirationAlert, expirationDate) === 1
+        case 2:
+          return expirationAlert !== -1 && resolveExpiration(expirationAlert, expirationDate) === 2
+        default:
+          return true
+      }
+    },
+    sortingFn: (rowA, rowB) => {
+      const expAlertA = rowA.original.expirationAlert
+      const expAlertB = rowB.original.expirationAlert
+      const dateA = new Date(rowA.original.expirationDate).getTime()
+      const dateB = new Date(rowB.original.expirationDate).getTime()
+      if (expAlertA === -1 || expAlertB === -1) return 0
+
+      return dateA - dateB
+    },
+    cell: ({ row }) => (
+      <div className="flex flex-row justify-center items-center relative ">
+        {setExpirationIcon(
+          resolveExpiration(row.original.expirationAlert, row.original.expirationDate)
+        )}
+        <p className=" text-center text-[12px] ">
+          {row.original.expirationAlert === -1
+            ? '-'
+            : parseDateToDashed(row.original.expirationDate)}
+        </p>
+      </div>
+    )
   },
   {
     id: 'actions',
@@ -180,12 +233,18 @@ export const columns: ColumnDef<Item>[] = [
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="border-primary bg-slate-900">
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => table.options.meta?.openEditDialog(r.id)}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => table.options.meta?.openEditDialog(r.id)}
+              >
                 Editar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => table.options.meta?.openDeleteDialog(r.id)}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => table.options.meta?.openDeleteDialog(r.id)}
+              >
                 Eliminar
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -200,3 +259,24 @@ export const columns: ColumnDef<Item>[] = [
     enableHiding: true
   }
 ]
+
+function resolveExpiration(expirationAlert: number, expirationDate: Date): number {
+  const now = new Date()
+  const diff = now.getTime() - 3 * 60 * 60 * 1000 - expirationDate.getTime()
+  const adjustedDate = new Date(expirationDate)
+  adjustedDate.setDate(adjustedDate.getDate() - expirationAlert)
+  const diff2 = now.getTime() - 3 * 60 * 60 * 1000 - adjustedDate.getTime()
+  if (expirationAlert !== -1) {
+    if (diff > 0) {
+      return 2
+    } else if (diff2 > 0) {
+      return 1
+    }
+  }
+  return 0
+}
+function setExpirationIcon(resolveValue: number) {
+  if (resolveValue === 2) return <BadgeX className="absolute left-12 text-red-400" />
+  if (resolveValue === 1) return <BadgeAlert className="absolute left-12 text-yellow-200" />
+  else return null
+}

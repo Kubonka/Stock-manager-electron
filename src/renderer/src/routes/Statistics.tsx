@@ -14,7 +14,6 @@ function Statistics() {
   async function handleSearch(date1: Date) {
     allData.current = await getStatistics(date1 as Date)
     handleSelection(selection)
-    console.log('all data reached', allData)
   }
   function handleSelection(option: string) {
     setSelection(option)
@@ -29,7 +28,6 @@ function Statistics() {
       case 'yearly':
         setData(allData.current.yearly)
         break
-
       default:
         break
     }

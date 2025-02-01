@@ -17,7 +17,7 @@ export function parseDate(isoString: string): string {
   // 	.map((part) => part.padStart(2, "0"));
   // return `${day}/${month}/${year}`;
   //1/3/2024, 10:39:54 PM
-  console.log(isoString)
+
   const [datePart] = isoString.split(',')
   const objDate = toStringObjectDate(datePart)
   return `${objDate.day}/${objDate.month}/${objDate.year}`
@@ -104,4 +104,32 @@ export function parsedDateArgentina(dateString: string): string {
   const seconds = date.getUTCSeconds().toString().padStart(2, '0')
 
   return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`
+}
+
+export function parseDateToDashed(date: Date): string {
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0') // Months are 0-based
+  const year = date.getFullYear()
+
+  return `${day}-${month}-${year}`
+}
+export function parseDashedToDate(ddmmyyyy: string): Date | null {
+  const regex = /^(\d{2})-(\d{2})-(\d{4})$/
+  const match = ddmmyyyy.match(regex)
+
+  if (!match) return null
+
+  const [, day, month, year] = match.map(Number)
+
+  // Month should be between 1 and 12, and day should be valid for the given month/year
+  if (month < 1 || month > 12) return null
+
+  const date = new Date(year, month - 1, day)
+
+  // Ensure that the parsed date matches the input values (to prevent cases like 31-02-2024)
+  if (date.getDate() !== day || date.getMonth() + 1 !== month || date.getFullYear() !== year) {
+    return null
+  }
+
+  return date
 }

@@ -19,7 +19,6 @@ export default class ItemRepo implements TItemRepo {
   }
   public async create(body: Item): Promise<TStatusMessage> {
     try {
-      console.log('CREATE')
       const { id, ...rest } = body
       await prisma.item.create({
         data: {
@@ -28,21 +27,16 @@ export default class ItemRepo implements TItemRepo {
       })
       return { status: 'SUCCESS', message: 'Item created' }
     } catch (error) {
-      console.log(error)
       return { status: 'ERROR', message: 'Item creation failed' }
     }
   }
   public async update(body: Item): Promise<TStatusMessage> {
     try {
-      console.log('Body received:', body)
-
       const { id, ...rest } = body
 
       if (!id) {
         return { status: 'ERROR', message: 'Invalid ID provided' }
       }
-      console.log('ID to update:', id)
-      console.log('Update data:', rest)
 
       // Check if the item exists
       const existingItem = await prisma.item.findUnique({ where: { id } })

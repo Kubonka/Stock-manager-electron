@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "active": true,
+    "name": "fiambres"
+  },
+  {
+    "id": 2,
+    "active": true,
+    "name": "condimentos"
+  },
+  {
+    "id": 3,
+    "active": true,
+    "name": "bebidas"
+  },
+  {
+    "id": 4,
+    "active": true,
+    "name": "galletitas"
+  },
+  {
+    "id": 5,
+    "active": true,
+    "name": " limpieza"
+  },
+  {
+    "id": 6,
+    "active": true,
+    "name": "cigarrillos"
+  },
+  {
+    "id": 7,
+    "active": true,
+    "name": "productos de almancen"
+  },
+  {
+    "id": 8,
+    "active": true,
+    "name": "golosinas"
+  },
+  {
+    "id": 9,
+    "active": true,
+    "name": "congelados"
+  },
+  {
+    "id": 10,
+    "active": true,
+    "name": "libreria"
+  },
+  {
+    "id": 11,
+    "active": true,
+    "name": "snack"
+  },
+  {
+    "id": 12,
+    "active": true,
+    "name": "lacteos"
+  }
+]

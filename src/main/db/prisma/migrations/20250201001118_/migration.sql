@@ -1,0 +1,44 @@
+-- CreateTable
+CREATE TABLE "item" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "ean" TEXT NOT NULL,
+    "active" BOOLEAN NOT NULL,
+    "description" TEXT NOT NULL DEFAULT '',
+    "buyPrice" REAL NOT NULL,
+    "sellPrice" REAL NOT NULL DEFAULT 0,
+    "stock" INTEGER NOT NULL DEFAULT 0,
+    "lowStock" INTEGER NOT NULL DEFAULT 0,
+    "categoryId" INTEGER NOT NULL,
+    "saleId" INTEGER,
+    "expirationDate" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expirationAlert" INTEGER NOT NULL DEFAULT -1,
+    CONSTRAINT "item_saleId_fkey" FOREIGN KEY ("saleId") REFERENCES "sale" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "item_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "category" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "category" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "active" BOOLEAN NOT NULL,
+    "name" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "sale" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "active" BOOLEAN NOT NULL,
+    "date" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "totalPrice" REAL NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Sale_Item" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "count" INTEGER NOT NULL,
+    "subTotal" REAL NOT NULL,
+    "listId" INTEGER NOT NULL,
+    "saleId" INTEGER NOT NULL,
+    "itemId" INTEGER NOT NULL,
+    CONSTRAINT "Sale_Item_itemId_fkey" FOREIGN KEY ("itemId") REFERENCES "item" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "Sale_Item_saleId_fkey" FOREIGN KEY ("saleId") REFERENCES "sale" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);

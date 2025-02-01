@@ -27,7 +27,6 @@ function SaleInspector() {
     }
   }, [date])
   async function handleDeleteSale(saleId: number) {
-    console.log('delete', saleId)
     setDialogDeleteOpen(true)
     setSaleToDelete(saleId)
   }
@@ -52,7 +51,7 @@ function SaleInspector() {
           onSubmit={() => handleSearch()}
         />
       </div>
-      <div className="flex flex-row gap-16 w-full h-[90%] justify-center pb-16 overflow-y-auto">
+      <div className="flex flex-row gap-16 w-full h-[90%] justify-between pb-16 overflow-y-auto">
         <div className="flex flex-col w-[30%] h-full items-end ">
           <div className="flex flex-row gap-16 bg-slate-900 rounded-t-md border-2   border-primary p-8 w-full justify-center h-[710px] overflow-y-auto ">
             <ul className="w-full h-full">
@@ -73,7 +72,7 @@ function SaleInspector() {
                   }}
                 >
                   <Label className="text-[20px] text-muted-foreground cursor-pointer">
-                    {parsedDateArgentina(sale.date.toISOString()).slice(12)}
+                    {parsedDateArgentina(sale.date.toISOString()).slice(12, -3)}
                   </Label>
                   <Label className="text-[20px] text-muted-foreground cursor-pointer">
                     {'$ ' + sale.totalPrice}
@@ -92,26 +91,28 @@ function SaleInspector() {
           </div>
 
           <div className="flex flex-row gap-2 h-16  px-8 border-b-2 border-x-2  rounded-b-md bg-slate-900 border-primary w-full  items-center justify-between">
-            <Label className="text-muted-foreground md:text-[20px]">{`TOTAL`} </Label>
-            <Label className="text-muted-foreground md:text-[20px] pr-[24px]">
+            <Label className="text-muted-foreground md:text-[22px]">{`TOTAL DIARIO`} </Label>
+            <Label className="text-muted-foreground md:text-[22px] pr-[24px]">
               {`$ ${sales.reduce((acc, curr) => acc + curr.totalPrice, 0) || 0}`}
             </Label>
           </div>
         </div>
 
-        <div className="flex flex-col w-full h-full items-end ">
-          <CartList
-            cart={currentSale?.items || []}
-            onDeleteItem={null}
-            className=" rounded-t-md rounded-bl-md  border-2 border-primary w-full h-[710px] max-h-[710px]  px-8 py-2 bg-slate-900 overflow-y-auto"
-          />
-          <div className="flex flex-row gap-2 h-16  px-8 border-b-2 border-x-2  rounded-b-md bg-slate-900 border-primary w-[360px]  items-center justify-between">
+        {/* <div className="flex flex-col w-full h-full items-end "> */}
+        <CartList
+          cart={currentSale?.items || []}
+          onDeleteItem={null}
+          className=" rounded-t-md rounded-bl-md  border-2 border-primary w-full h-[710px] max-h-[710px]  px-8 py-2 bg-slate-900 overflow-y-auto"
+          isLegendOpen={false}
+          total={currentSale?.totalPrice || 0}
+        />
+        {/* <div className="flex flex-row gap-2 h-16  px-8 border-b-2 border-x-2  rounded-b-md bg-slate-900 border-primary w-[360px]  items-center justify-between">
             <Label className="text-muted-foreground md:text-[30px]">{`TOTAL`} </Label>
             <Label className="text-muted-foreground md:text-[30px]">
               {`$ ${currentSale?.totalPrice || 0}`}
             </Label>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
         {/* //$DIALOG DELETE*/}
         <Dialog open={dialogDeleteOpen} onOpenChange={setDialogDeleteOpen}>
           <DialogContent>

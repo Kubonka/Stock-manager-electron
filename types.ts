@@ -14,6 +14,8 @@ export type Item = {
   stock: number
   lowStock: number
   categoryId: number
+  expirationDate: Date
+  expirationAlert: number
 }
 export type CartItem = Item & {
   count: number
@@ -26,6 +28,14 @@ export type Sale = {
   date: Date
   items: CartItem[]
   totalPrice: number
+}
+export type SaleItem = {
+  id: number
+  count: number
+  subTotal: number
+  listId: number
+  saleId: number
+  itemId: number
 }
 export type Statistics = {
   daily: Stat[]

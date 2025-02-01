@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import CodeInput from '../components/sales/CodeInput'
 import CartList from '../components/sales/CartList'
 import { getAllItems } from '../serverActions/stockActions'
-import { Label } from '../components/ui/label'
 import { Button } from '../components/ui/button'
 import { toast } from '../hooks/use-toast'
 import { createSale } from '../serverActions/salesActions'
@@ -14,6 +13,7 @@ function Sales() {
   const [cart, setCart] = useState<CartItem[]>([] as CartItem[])
   const [items, setItems] = useState<Item[]>([])
   const [total, setTotal] = useState(0)
+  const [overrideInput, setOverrideInput] = useState('')
   const [codeStatus, setCodeStatus] = useState('')
   const [codeLegendShow, setCodeLegendShow] = useState(false)
   const [codeLegendData, setCodeLegendData] = useState<Item[]>([])
@@ -35,7 +35,16 @@ function Sales() {
   }
   useEffect(() => {
     loadItems()
+    window.addEventListener('keydown', handleGlobalKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown)
+    }
   }, [])
+  function handleGlobalKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      setClearInputTrigger((p) => !p)
+    }
+  }
   useEffect(() => {
     //todo sumar todo el cart y updatear el TOTAL
     setTotal(
@@ -56,7 +65,7 @@ function Sales() {
     return count * item.sellPrice
   }
   function handleSubmitInput(count: number, code: string) {
-    //todo reworkear la logica para aislar el IF
+    console.log(count, code)
     if (count > 0) {
       const foundItem = items.find((item) => item.ean === code)
       if (foundItem) {
@@ -66,11 +75,15 @@ function Sales() {
           ...p,
           { listId: ++listId.current, count, subTotal: getSubtotal(count, foundItem), ...foundItem }
         ])
+        setOverrideInput('')
+        setFocusInputTrigger((p) => !p)
       } else {
         setCodeStatus('red')
+        setOverrideInput('')
       }
     } else {
       setCodeStatus('red')
+      setOverrideInput('')
     }
   }
   function handleDeleteItem(id: number) {
@@ -102,11 +115,29 @@ function Sales() {
       console.log(error)
     }
   }
+  function handleLegendItemClick(item: Item) {
+    console.log(item)
+    setOverrideInput(item.ean)
+  }
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter') {
+      console.log('ESCAPE')
+    } else if (event.key === 'Backspace') {
+      event.preventDefault()
+      console.log('BACK')
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      console.log('ESCAPE')
+    }
+  }
   //note Markup
   return (
-    <div className="flex flex-row bg-background w-full h-full">
-      <div className="bg-background w-full h-full flex flex-col items-center justify-between px-8 overflow-hidden box-border gap-8 pt-8">
-        <div className="flex flex-row w-full items-center">
+    <div className="flex flex-row bg-background w-full h-full" onKeyDown={handleKeyDown}>
+      <div
+        onKeyDown={handleKeyDown}
+        className="bg-background w-full h-full flex flex-col items-center justify-between px-8 overflow-hidden box-border gap-8 pt-8"
+      >
+        <div className="flex flex-row w-full items-center gap-2">
           <div
             className={`${
               codeStatus === 'red'
@@ -114,41 +145,42 @@ function Sales() {
                 : codeStatus === 'green'
                   ? 'border-green-500'
                   : 'border-background'
-            } border-8 w-full box-content rounded-md`}
+            } border-8 w-full box-content rounded-md -ml-2`}
           >
             <CodeInput
               onSubmit={handleSubmitInput}
               clearInputTrigger={clearInputTrigger}
               focusInputTrigger={focusInputTrigger}
+              overrideInput={overrideInput}
             />
           </div>
           <Button
             onClick={() => setCodeLegendShow((p) => !p)}
-            className={`${codeLegendShow ? 'bg-primary hover:bg-primary border-[2px] border-primary' : 'border-[2px] border-primary bg-slate-900 hover:bg-slate-900 '} text-muted-foreground w-48 h-[80px] text-lg`}
+            className={`${codeLegendShow ? 'border-[2px] border-primary bg-slate-900 hover:bg-slate-900 ' : 'bg-primary hover:bg-primary border-[2px] border-primary'} text-muted-foreground w-48 h-[80px] text-lg hover:text-secondary-foreground`}
           >
             <ScrollText className="w-[48px]" />
             Códigos
           </Button>
         </div>
         <div className="flex flex-row w-full gap-2">
-          <div className="flex flex-col w-full h-full items-end ">
-            <CartList
-              cart={cart}
-              onDeleteItem={handleDeleteItem}
-              className=" rounded-t-md rounded-bl-md  border-2 border-primary w-full h-[620px] max-h-[620px]  px-8 py-2 bg-slate-900 overflow-y-auto"
-            />
-            <div className="flex flex-row gap-2 h-16  px-8 border-b-2 border-x-2  rounded-b-md bg-slate-900 border-primary w-[360px]  items-center justify-between">
-              <Label className="text-muted-foreground md:text-[20px]">{`TOTAL`} </Label>
-              <Label className="text-muted-foreground md:text-[20px]">{`$ ${total}`} </Label>
-            </div>
-          </div>
-          <CodeLegend show={codeLegendShow} data={codeLegendData} onClose={() => {}} />
+          <CartList
+            cart={cart}
+            onDeleteItem={handleDeleteItem}
+            className="flex flex-col rounded-t-md rounded-bl-md  border-2 border-primary w-full h-[620px] max-h-[620px]  px-8 py-2 bg-slate-900 overflow-y-auto"
+            isLegendOpen={codeLegendShow}
+            total={total}
+          />
+          <CodeLegend
+            show={codeLegendShow}
+            data={codeLegendData}
+            onItemClick={handleLegendItemClick}
+          />
         </div>
         <div className=" gap-16 flex justify-between w-full ">
-          <Button onClick={handleCancelPurchase} className="w-[360px] h-[48px] text-[20px]">
+          <Button onClick={handleCancelPurchase} className="z-10 w-[360px] h-[48px] text-[20px]">
             Cancelar
           </Button>
-          <Button onClick={handleSubmitPurchase} className="w-[360px] h-[48px] text-[20px]">
+          <Button onClick={handleSubmitPurchase} className="z-10 w-[360px] h-[48px] text-[20px]">
             Finalizar
           </Button>
         </div>

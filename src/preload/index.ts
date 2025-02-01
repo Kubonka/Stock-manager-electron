@@ -12,7 +12,6 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer: {
         send: (channel: string, ...args: any[]) => {
-          console.log('CALL')
           ipcRenderer.send(channel, ...args)
         },
         on: (channel: string, listener: (...args: any[]) => void) => {

@@ -1,13 +1,21 @@
-import { createDummyDb, testIpc } from '../serverActions/developerActions'
+import { Button } from '../components/ui/button'
+import { createDummyDb, testIpc, migrateDB, writeToDB } from '../serverActions/developerActions'
 function Developer() {
   return (
-    <div>
-      Developer
-      <div className="w-72 h-24 bg-red-300" onClick={() => createDummyDb()}>
+    <div className="flex flex-col gap-8">
+      <Button className="w-96 h-24" onClick={() => createDummyDb()}>
         Crear DB
-      </div>
-      <div className="w-72 h-24 bg-blue-800" onClick={() => testIpc()}>
+      </Button>
+      <Button className="w-96 h-24" onClick={() => testIpc()}>
         Test
+      </Button>
+      <div className=" flex flex-row gap-2">
+        <Button className="w-96 h-24" onClick={() => migrateDB()}>
+          Migrar DB
+        </Button>
+        <Button className="w-96 h-24" onClick={() => writeToDB()}>
+          Write DB
+        </Button>
       </div>
     </div>
   )

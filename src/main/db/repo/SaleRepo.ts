@@ -103,6 +103,9 @@ class SaleRepo implements TSaleRepo {
             }
           ]
         },
+        orderBy: {
+          date: 'asc'
+        },
         include: {
           saleItems: {
             include: {
@@ -168,7 +171,7 @@ class SaleRepo implements TSaleRepo {
     const result: Stat[] = []
     for (let hour = 6; hour <= 23; hour++) {
       const salesByHour = sales
-        .filter((sale) => sale.date.getHours() === hour)
+        .filter((sale) => sale.date.getHours() + 3 === hour)
         .reduce((total, curr) => {
           return total + curr.totalPrice
         }, 0)
@@ -182,14 +185,14 @@ class SaleRepo implements TSaleRepo {
     const month = date.getMonth()
     const lastDay = new Date(year, month + 1, 0).getDate()
     const result: Stat[] = []
-    console.log('lastDay', lastDay)
+
     for (let day = 1; day <= lastDay; day++) {
       const salesByDay = sales
         .filter((sale) => sale.date.getDate() === day)
         .reduce((total, curr) => {
           return total + curr.totalPrice
         }, 0)
-      console.log('salesByDay :', salesByDay, 'day :', day)
+
       result.push({ interval: day.toString(), total: salesByDay })
     }
     return result

@@ -32,6 +32,7 @@ import ManageProduct from './ManageProduct'
 import EANReader from './EANReader'
 import { Plus } from 'lucide-react'
 import { Category, Item, TStatusMessage } from '../../../../../types'
+import { parseDashedToDate } from '../../lib/utils'
 //todo V
 //import { deleteBudget } from "@/actions/budgets";
 interface DataTableProps<TData, TValue> {
@@ -59,7 +60,6 @@ export default function DataTable<TData extends Item, TValue>({
   const [manageProductVisible, setManageProductVisible] = useState(false)
   const [eanReaderVisible, setEanReaderVisible] = useState(false)
   const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false)
-
   const deleteId = useRef<number>(0)
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -68,7 +68,6 @@ export default function DataTable<TData extends Item, TValue>({
   })
   const [currentItem, setCurrentItem] = useState<Item | null>(null)
   const [categories, setCategories] = useState([] as Category[])
-
   const [formData, setFormData] = useState<Item>({
     id: 0,
     ean: '',
@@ -78,7 +77,9 @@ export default function DataTable<TData extends Item, TValue>({
     buyPrice: 0,
     stock: 0,
     lowStock: 0,
-    active: true
+    active: true,
+    expirationDate: new Date(Date.now()),
+    expirationAlert: -1
   })
   const table = useReactTable({
     data,
@@ -144,7 +145,9 @@ export default function DataTable<TData extends Item, TValue>({
       buyPrice: 0,
       stock: 0,
       lowStock: 0,
-      active: true
+      active: true,
+      expirationDate: new Date(Date.now()),
+      expirationAlert: 0
     })
     setCurrentItem({
       id: 0,
@@ -155,7 +158,9 @@ export default function DataTable<TData extends Item, TValue>({
       ean: '',
       lowStock: 0,
       sellPrice: 0,
-      stock: 0
+      stock: 0,
+      expirationDate: new Date(Date.now()),
+      expirationAlert: 0
     })
   }
   function handleEANSubmit(ean: string) {
@@ -167,15 +172,24 @@ export default function DataTable<TData extends Item, TValue>({
       initFormAndItem()
       setFormData({ ...formData, ean })
     }
-
     setEanReaderVisible(false)
     setManageProductVisible(true)
   }
   const handleInputChange = (field: keyof Item, value: string | number) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value
-    }))
+    if (field === 'expirationDate') {
+      const newDate = parseDashedToDate(value as string)
+      if (newDate) {
+        setFormData((prev) => ({
+          ...prev,
+          [field]: newDate
+        }))
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value
+      }))
+    }
   }
   function validateForm() {
     if (formData.buyPrice < 0) return false
@@ -208,7 +222,7 @@ export default function DataTable<TData extends Item, TValue>({
   }
   async function handleDeleteRow() {
     setDialogDeleteOpen(false)
-    console.log('deleteId.current', deleteId.current)
+
     const result: TStatusMessage = await deleteItem(deleteId.current)
     if (result.status === 'SUCCESS') {
       toast({
@@ -238,6 +252,24 @@ export default function DataTable<TData extends Item, TValue>({
               }
               className="w-full"
             />
+            <Select
+              onValueChange={(value) => {
+                if (value === '0') table.getColumn('expirationDate')?.setFilterValue(0)
+                if (value === '1') table.getColumn('expirationDate')?.setFilterValue(1)
+                if (value === '2') table.getColumn('expirationDate')?.setFilterValue(2)
+              }}
+            >
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Vencimiento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="0">TODOS</SelectItem>
+                  <SelectItem value="1">POR VENCER</SelectItem>
+                  <SelectItem value="2">VENCIDO</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <Select
               onValueChange={(value) => {
                 if (value === '0') table.getColumn('stock')?.setFilterValue(0)

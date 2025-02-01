@@ -9,7 +9,6 @@ export async function getAllItems() {
   }
 }
 export async function deleteItem(itemId: number) {
-  console.log('asd', itemId)
   try {
     const res = await window.electronAPI.ipcRenderer.invoke('deleteItem', itemId)
     return res
