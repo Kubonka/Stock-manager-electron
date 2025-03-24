@@ -121,13 +121,13 @@ function Sales() {
   }
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Enter') {
-      console.log('ESCAPE')
+      //console.log('ESCAPE')
     } else if (event.key === 'Backspace') {
-      event.preventDefault()
-      console.log('BACK')
+      //event.preventDefault()
+      //console.log('BACK')
     } else if (event.key === 'Escape') {
-      event.preventDefault()
-      console.log('ESCAPE')
+      //event.preventDefault()
+      //console.log('ESCAPE')
     }
   }
   //note Markup

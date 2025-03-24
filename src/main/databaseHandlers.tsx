@@ -4,8 +4,24 @@ import ItemRepo from './db/repo/ItemRepo'
 import SaleRepo from './db/repo/SaleRepo'
 //import DummyDb from './db/DummyDb'
 import DBMigrator from './db/DBMigrator'
+//import Store from 'electron-store'
 
-export default function databaseHandlers(): void {
+export default async function databaseHandlers() {
+  const Store = (await import('electron-store')).default
+  //*CURRENCY
+
+  ipcMain.handle('getExchangeValue', async (_, __) => {
+    const store = new Store()
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return store.get('usd')
+  })
+  ipcMain.handle('setExchangeValue', async (_, args) => {
+    const store = new Store()
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return store.set('usd', args)
+  })
   //*CATEGORY
   ipcMain.handle('getAllCategories', async (_, __) => {
     return CategoryRepo.getInstance().getAll()

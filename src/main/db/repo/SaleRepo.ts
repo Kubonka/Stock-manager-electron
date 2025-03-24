@@ -147,6 +147,9 @@ class SaleRepo implements TSaleRepo {
             date: {
               lt: new Date(`${year + 1}-01-01T00:00:00Z`)
             }
+          },
+          {
+            active: true
           }
         ]
       }
@@ -170,12 +173,13 @@ class SaleRepo implements TSaleRepo {
   private getTotalOfDay(sales: Omit<Sale, 'items'>[]) {
     const result: Stat[] = []
     for (let hour = 6; hour <= 23; hour++) {
-      const salesByHour = sales
-        .filter((sale) => sale.date.getHours() + 3 === hour)
-        .reduce((total, curr) => {
-          return total + curr.totalPrice
-        }, 0)
-      result.push({ interval: hour.toString(), total: salesByHour })
+      const salesByHour = sales.filter((sale) => sale.date.getHours() + 3 === hour)
+      console.log('salesByHour', salesByHour)
+      const salesByHour2 = salesByHour.reduce((total, curr) => {
+        return total + curr.totalPrice
+      }, 0)
+      console.log('salesByHour2', salesByHour2)
+      result.push({ interval: hour.toString(), total: salesByHour2 })
     }
     return result
   }

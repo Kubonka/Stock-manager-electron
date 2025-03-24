@@ -61,10 +61,20 @@ function CodeInput({ onSubmit, clearInputTrigger, focusInputTrigger, overrideInp
       onSubmit(count, code)
     } else if (event.key === 'Backspace') {
       event.preventDefault()
-      setBarCode((prev) => prev.slice(0, -1))
+      if (event.key === 'Backspace' && inputRef.current) {
+        const { selectionStart, selectionEnd } = inputRef.current
+        if (selectionStart !== selectionEnd) {
+          console.log('Text is selected and Backspace is pressed!')
+          // Perform your action here
+          setBarCode(
+            (prev) => prev.slice(0, selectionStart as number) + prev.slice(selectionEnd as number)
+          )
+        } else {
+          setBarCode((prev) => prev.slice(0, -1))
+        }
+      }
     } else if (event.key === 'Escape') {
       event.preventDefault()
-      console.log('ESCAPE')
       setBarCode('')
     }
   }

@@ -24,6 +24,7 @@ log.errorHandler.startCatching()
 log.eventLogger.startLogging()
 
 if (require('electron-squirrel-startup')) app.quit()
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({

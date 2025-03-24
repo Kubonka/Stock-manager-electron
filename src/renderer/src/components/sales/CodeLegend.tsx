@@ -48,7 +48,7 @@ function CodeLegend({ show, data, onItemClick }: Props) {
         {filteredData.map((item, i) => (
           <li
             key={i}
-            className="text-muted-foreground flex flex-row justify-between cursor-pointer hover:bg-primary p-1 rounded-md"
+            className="text-muted-foreground flex flex-row justify-between cursor-pointer hover:bg-primary p-1 rounded-md hover:text-foreground"
             onClick={() => onItemClick(item)}
           >
             <Label className="text-[16px] cursor-pointer">{item.ean}</Label>

@@ -73,7 +73,7 @@ function Menu() {
           >
             Administrar Categorias
           </DropdownMenuItem>
-          {/* <DropdownMenuItem
+          <DropdownMenuItem
             onClick={() => {
               navigate('/developer')
               setTitle('DEV')
@@ -81,7 +81,7 @@ function Menu() {
             className="text-[16px] font-semibold cursor-pointer"
           >
             Developer
-          </DropdownMenuItem> */}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
